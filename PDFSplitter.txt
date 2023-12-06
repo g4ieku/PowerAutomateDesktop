@@ -1,0 +1,20 @@
+Display.SelectFileDialog.SelectFiles Title: $'''Provide the path of the PDF which you would like to use''' InitialDirectory: $'''C:\\data''' FileFilter: $'''*.pdf''' IsTopMost: True CheckIfFileExists: True SelectedFiles=> SelectedPDFFiles ButtonPressed=> ButtonPressed
+LOOP FOREACH SelectedPDFFile IN SelectedPDFFiles
+    SET PageCount TO 1
+    SET Status TO $'''OK'''
+    Variables.CreateNewList List=> ExtractedPDFFiles
+    LOOP WHILE (Status) = ($'''OK''')
+        Pdf.ExtractPages PDFFile: SelectedPDFFile PageSelection: PageCount ExtractedPDFPath: $'''%SelectedPDFFile.Directory%\\Split_%SelectedPDFFile.Name%''' IfFileExists: Pdf.IfFileExists.AddSequentialSuffix ExtractedPDFFile=> ExtractedPDF
+                ON ERROR PageOutOfBoundsError
+                    SET Status TO $'''OutOfBounds'''
+                ON ERROR
+                    GOTO OutOfBounds
+                END
+        Variables.AddItemToList Item: ExtractedPDF List: ExtractedPDFFiles
+        Variables.IncreaseVariable Value: PageCount IncrementValue: 1
+    END
+    LABEL OutOfBounds
+    Display.ShowMessageDialog.ShowMessage Message: $'''Your PDF split into %ExtractedPDFFiles.Count% files.
+
+Your splitted pdf files are located here: %SelectedPDFFile.Directory%''' Icon: Display.Icon.Information Buttons: Display.Buttons.OK DefaultButton: Display.DefaultButton.Button1 IsTopMost: False ButtonPressed=> ButtonPressed2
+END
