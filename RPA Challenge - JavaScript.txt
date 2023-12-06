@@ -1,0 +1,19 @@
+SET excelFilePath TO $'''F:\\dowloads from web\\challenge.xlsx'''
+Excel.LaunchExcel.LaunchAndOpenUnderExistingProcess Path: excelFilePath Visible: False ReadOnly: False Instance=> ExcelInstance
+Excel.GetFirstFreeColumnRow Instance: ExcelInstance FirstFreeColumn=> FirstFreeColumn FirstFreeRow=> FirstFreeRow
+Excel.ReadFromExcel.ReadCells Instance: ExcelInstance StartColumn: 1 StartRow: 1 EndColumn: FirstFreeColumn - 1 EndRow: FirstFreeRow - 1 ReadAsText: True FirstLineIsHeader: True RangeValue=> ExcelData
+Excel.CloseExcel.Close Instance: ExcelInstance
+WebAutomation.LaunchChrome.LaunchChrome Url: $'''https://www.rpachallenge.com/''' WindowState: WebAutomation.BrowserWindowState.Normal ClearCache: False ClearCookies: False WaitForPageToLoadTimeout: 60 Timeout: 60 BrowserInstance=> Browser
+LOOP FOREACH CurrentItem IN ExcelData
+    WebAutomation.ExecuteJavascript BrowserInstance: Browser Javascript: $'''function ExecuteScript() {
+document.querySelectorAll(\'a[href=\"./assets/downloadFiles/challenge.xlsx\"] ~ button\')[0].click();
+document.querySelectorAll(\'div input[ng-reflect-name=\"labelCompanyName\"]\')[0].value=\"%CurrentItem['Company Name']%\";
+document.querySelectorAll(\'div input[ng-reflect-name=\"labelLastName\"]\')[0].value=\"%CurrentItem['Last Name']%\";
+document.querySelectorAll(\'div input[ng-reflect-name=\"labelAddress\"]\')[0].value=\"%CurrentItem['Address']%\";
+document.querySelectorAll(\'div input[ng-reflect-name=\"labelEmail\"]\')[0].value=\"%CurrentItem['Email']%\";
+document.querySelectorAll(\'div input[ng-reflect-name=\"labelFirstName\"\')[0].value=\"%CurrentItem['First Name']%\";
+document.querySelectorAll(\'div input[ng-reflect-name=\"labelPhone\"\')[0].value=\"%CurrentItem['Phone Number']%\";
+document.querySelectorAll(\'div input[ng-reflect-name=\"labelRole\"\')[0].value=\"%CurrentItem['Role in Company']%\";
+document.querySelectorAll(\'input[type=\"submit\"][value=\"Submit\"\')[0].click();
+}'''
+END
